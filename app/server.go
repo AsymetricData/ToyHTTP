@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net"
 	"os"
@@ -39,9 +40,45 @@ func handleRequest(conn net.Conn) {
 	}
 	fmt.Println("Handled new data : ", n)
 
+	getPath(buffer)
+
 	_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 
 	if err != nil {
 		fmt.Println("Error Write ", err)
 	}
+}
+
+func getPath(buffer []byte) string {
+	//HTTPmethod := ""
+	HTTPpath := ""
+	sn := 0
+	//protocol := ""
+
+	for sn <= len(buffer) {
+		lineIndex := bytes.Index(buffer, []byte("\r\n"))
+
+		if lineIndex == -1 {
+			fmt.Println("Error in the header")
+			os.Exit(1)
+		}
+
+		line := buffer[sn:lineIndex]
+
+		for lineIndex != -1 {
+			slices := bytes.Split(line, []byte(" "))
+
+			if len(slices) != 3 {
+				break
+			}
+
+			if string(slices[0]) == "GET" || string(slices[0]) == "POST" {
+				fmt.Println("Ok")
+			}
+		}
+
+		sn = lineIndex + 2
+	}
+
+	return HTTPpath
 }
