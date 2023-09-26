@@ -16,28 +16,32 @@ func main() {
 		fmt.Println("Failed to bind port 4221")
 		os.Exit(1)
 	}
-	conn, err := l.Accept()
-
-	if err != nil {
-		fmt.Println("Failed to accept ", err.Error())
-		os.Exit(1)
-	}
-
-	defer conn.Close()
-
 	for {
-		buffer := make([]byte, 1024)
-		n, err := conn.Read(buffer)
+		conn, err := l.Accept()
 
 		if err != nil {
-			fmt.Println("Error while reading Conn ", err)
+			fmt.Println("Failed to accept ", err.Error())
+			os.Exit(1)
 		}
 
-		handleRequest(conn, buffer, n)
+		handleRequest(conn)
 	}
 }
 
-func handleRequest(conn net.Conn, buffer []byte, n int) {
+func handleRequest(conn net.Conn) {
+	defer conn.Close()
+
+	buffer := make([]byte, 1024)
+	n, err := conn.Read(buffer)
+
+	if err != nil {
+		fmt.Println("Error while reading Conn ", err)
+	}
 	fmt.Println("Handled new data : ", n)
-	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+
+	_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+
+	if err != nil {
+		fmt.Println("Error Write ", err)
+	}
 }
