@@ -40,9 +40,19 @@ func handleRequest(conn net.Conn) {
 	}
 	fmt.Println("Handled new data : ", n)
 
-	getPath(buffer)
+	path := getPath(buffer)
 
-	_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	switch path {
+	case "/":
+		writeResponse("HTTP/1.1 200 OK", conn)
+	default:
+		writeResponse("HTTP/1.1 404 Not Found", conn)
+
+	}
+}
+
+func writeResponse(response string, conn net.Conn) {
+	_, err := conn.Write([]byte(response + "\r\n\r\n"))
 
 	if err != nil {
 		fmt.Println("Error Write ", err)
@@ -73,7 +83,9 @@ func getPath(buffer []byte) string {
 			}
 
 			if string(slices[0]) == "GET" || string(slices[0]) == "POST" {
-				fmt.Println("Ok")
+				//HTTPmethod = string(slices[0])
+				HTTPpath = string(slices[1])
+				return HTTPpath
 			}
 		}
 
