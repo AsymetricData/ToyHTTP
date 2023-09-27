@@ -51,6 +51,10 @@ func handleRequest(conn net.Conn) {
 		value := r.Params["value"]
 		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
 	})
+	router.Handle("/echo/{value}/{other}", func(conn net.Conn, r *request.Request) {
+		value := r.Params["value"]
+		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
+	})
 
 	r := request.NewRequest(buffer)
 
