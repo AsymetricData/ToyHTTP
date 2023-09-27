@@ -64,9 +64,7 @@ func (route *Route) match(request *request.Request) bool {
 
 	rs := strings.Split(request.Path, "/")
 
-	if len(rs) <= len(route.Params) {
-		return false
-	} else {
+	if len(rs)-2 == len(route.Params) {
 		return "/"+rs[1] == route.Path
 	}
 
