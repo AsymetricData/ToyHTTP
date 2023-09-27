@@ -1,10 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"net"
 	"os"
+	"strconv"
+
+	"github.com/codecrafters-io/http-server-starter-go/app/request"
+	"github.com/codecrafters-io/http-server-starter-go/app/routes"
 )
 
 func main() {
@@ -33,64 +36,40 @@ func handleRequest(conn net.Conn) {
 	defer conn.Close()
 
 	buffer := make([]byte, 1024)
-	n, err := conn.Read(buffer)
+	_, err := conn.Read(buffer)
 
 	if err != nil {
 		fmt.Println("Error while reading Conn ", err)
 	}
-	fmt.Println("Handled new data : ", n)
+	//fmt.Println("Handled new data : ", n)
 
-	path := getPath(buffer)
+	router := routes.NewRouter("/", conn)
+	router.Handle("/", func(conn net.Conn, r *request.Request) {
+		writeResponse("HTTP/1.1 200 OK", 200, conn)
+	})
+	router.Handle("/echo/{value}", func(conn net.Conn, r *request.Request) {
+		value := r.Params["value"]
+		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
+	})
 
-	switch path {
-	case "/":
-		writeResponse("HTTP/1.1 200 OK", conn)
-	default:
-		writeResponse("HTTP/1.1 404 Not Found", conn)
+	r := request.NewRequest(buffer)
 
+	err = router.Get(&r)
+
+	if err != nil {
+		fmt.Println(err)
+		writeResponse("HTTP/1.1 404 Not Found", 404, conn)
 	}
+
 }
 
-func writeResponse(response string, conn net.Conn) {
+func writeResponse(response string, status int, conn net.Conn) {
+
+	//responseLen := len(response)
+
 	_, err := conn.Write([]byte(response + "\r\n\r\n"))
 
 	if err != nil {
 		fmt.Println("Error Write ", err)
 	}
-}
-
-func getPath(buffer []byte) string {
-	//HTTPmethod := ""
-	HTTPpath := ""
-	sn := 0
-	//protocol := ""
-
-	for sn <= len(buffer) {
-		lineIndex := bytes.Index(buffer, []byte("\r\n"))
-
-		if lineIndex == -1 {
-			fmt.Println("Error in the header")
-			os.Exit(1)
-		}
-
-		line := buffer[sn:lineIndex]
-
-		for lineIndex != -1 {
-			slices := bytes.Split(line, []byte(" "))
-
-			if len(slices) != 3 {
-				break
-			}
-
-			if string(slices[0]) == "GET" || string(slices[0]) == "POST" {
-				//HTTPmethod = string(slices[0])
-				HTTPpath = string(slices[1])
-				return HTTPpath
-			}
-		}
-
-		sn = lineIndex + 2
-	}
-
-	return HTTPpath
 }
