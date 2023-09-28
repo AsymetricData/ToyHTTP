@@ -42,7 +42,7 @@ func (response *Response) Write(data string) {
 	//
 
 	for index, value := range response.headers {
-		buffer = buffer + index + " " + value + "\r\n"
+		buffer = buffer + index + " " + value + " \r\n"
 	}
 
 	buffer = buffer + "Content-Length: " + strconv.Itoa(len) + "\r\n\r\n" + data
