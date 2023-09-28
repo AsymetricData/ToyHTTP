@@ -2,10 +2,7 @@ package routes
 
 import (
 	"errors"
-	"fmt"
 	"net"
-	"os"
-	"strconv"
 	"strings"
 
 	"github.com/codecrafters-io/http-server-starter-go/app/request"
@@ -48,18 +45,6 @@ func (router *Router) ServeStatic(directory string) {
 }
 
 func (router *Router) Get(r *request.Request) error {
-
-	//Check if it's in static
-
-	if _, err := os.Stat(router.StaticDirectory + r.Path); err == nil {
-		value, err := os.ReadFile(router.StaticDirectory + r.Path)
-		if err == nil {
-			write := "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + strconv.Itoa(len(value)) + "\r\n\r\n" + string(value)
-			router.Conn.Write([]byte(write))
-		} else {
-			fmt.Println("Error while loading file", err)
-		}
-	}
 
 	for _, route := range router.Routes {
 		s := route.match(r)

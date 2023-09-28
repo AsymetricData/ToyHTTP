@@ -70,6 +70,17 @@ func handleRequest(conn net.Conn) {
 		value := r.Headers.UserAgent
 		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
 	})
+	router.Handle("/files/{value}", func(conn net.Conn, r *request.Request) {
+		if _, err := os.Stat(router.StaticDirectory + r.Path); err == nil {
+			value, err := os.ReadFile(router.StaticDirectory + r.Path)
+			if err == nil {
+				write := "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + strconv.Itoa(len(value)) + "\r\n\r\n" + string(value)
+				router.Conn.Write([]byte(write))
+			} else {
+				fmt.Println("Error while loading file", err)
+			}
+		}
+	})
 	router.ServeStatic(staticDirectory)
 
 	r := request.NewRequest(buffer)
