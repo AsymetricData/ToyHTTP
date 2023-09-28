@@ -2,7 +2,10 @@ package routes
 
 import (
 	"errors"
+	"fmt"
 	"net"
+	"os"
+	"strconv"
 	"strings"
 
 	"github.com/codecrafters-io/http-server-starter-go/app/request"
@@ -15,13 +18,14 @@ type Route struct {
 }
 
 type Router struct {
-	Routes   []Route
-	BasePath string
-	Conn     net.Conn
+	Routes          []Route
+	BasePath        string
+	Conn            net.Conn
+	StaticDirectory string
 }
 
 func NewRouter(basePath string, conn net.Conn) Router {
-	return Router{make([]Route, 0), basePath, conn}
+	return Router{make([]Route, 0), basePath, conn, ""}
 }
 
 func (router *Router) Handle(path string, handler func(conn net.Conn, r *request.Request)) {
@@ -39,7 +43,23 @@ func (router *Router) Handle(path string, handler func(conn net.Conn, r *request
 	router.Routes = append(router.Routes, Route{path, params, handler})
 }
 
+func (router *Router) ServeStatic(directory string) {
+	router.StaticDirectory = directory
+}
+
 func (router *Router) Get(r *request.Request) error {
+
+	//Check if it's in static
+
+	if _, err := os.Stat(router.StaticDirectory + r.Path); err == nil {
+		value, err := os.ReadFile(router.StaticDirectory + r.Path)
+		if err == nil {
+			write := "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + strconv.Itoa(len(value)) + "\r\n\r\n" + string(value)
+			router.Conn.Write([]byte(write))
+		} else {
+			fmt.Println("Error while loading file", err)
+		}
+	}
 
 	for _, route := range router.Routes {
 		s := route.match(r)

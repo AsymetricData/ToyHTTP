@@ -10,9 +10,17 @@ import (
 	"github.com/codecrafters-io/http-server-starter-go/app/routes"
 )
 
+var staticDirectory string
+
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
-	fmt.Println("Logs from your program will appear here!")
+	fmt.Println("Server is starting...")
+
+	if len(os.Args) > 2 {
+		if os.Args[1] == "--directory" {
+			staticDirectory = os.Args[2]
+		}
+	}
 
 	l, err := net.Listen("tcp", "0.0.0.0:4221")
 
@@ -62,6 +70,7 @@ func handleRequest(conn net.Conn) {
 		value := r.Headers.UserAgent
 		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
 	})
+	router.ServeStatic(staticDirectory)
 
 	r := request.NewRequest(buffer)
 
