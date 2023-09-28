@@ -75,7 +75,7 @@ func handleRequest(conn net.Conn) {
 		if _, err := os.Stat(path); err == nil {
 			value, err := os.ReadFile(path)
 			if err == nil {
-				resp.SetHeader("Content-Type", "application/octet")
+				resp.SetHeader("Content-Type", "application/octet-stream")
 				resp.Write(string(value))
 			} else {
 				fmt.Println("Error while loading file", err)
