@@ -55,22 +55,22 @@ func handleRequest(conn net.Conn) {
 	//fmt.Println("Handled new data : ", n)
 
 	router := routes.NewRouter("/", conn)
-	router.Handle("/", func(conn net.Conn, r *request.Request) {
+	router.Get("/", func(conn net.Conn, r *request.Request) {
 		writeResponse("HTTP/1.1 200 OK", 200, conn)
 	})
-	router.Handle("/echo/{val}/{value}", func(conn net.Conn, r *request.Request) {
+	router.Get("/echo/{val}/{value}", func(conn net.Conn, r *request.Request) {
 		value := r.Params["val"] + "/" + r.Params["value"]
 		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
 	})
-	router.Handle("/echo/{value}", func(conn net.Conn, r *request.Request) {
+	router.Get("/echo/{value}", func(conn net.Conn, r *request.Request) {
 		value := r.Params["value"]
 		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
 	})
-	router.Handle("/user-agent", func(conn net.Conn, r *request.Request) {
+	router.Get("/user-agent", func(conn net.Conn, r *request.Request) {
 		value := r.Headers.UserAgent
 		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
 	})
-	router.Handle("/files/{value}", func(conn net.Conn, r *request.Request) {
+	router.Get("/files/{value}", func(conn net.Conn, r *request.Request) {
 		path := router.StaticDirectory + r.Params["value"]
 		fmt.Println(path)
 		if _, err := os.Stat(path); err == nil {
@@ -87,11 +87,23 @@ func handleRequest(conn net.Conn) {
 			fmt.Println("Not found !")
 		}
 	})
+	router.Post("/files/{value}", func(conn net.Conn, r *request.Request) {
+		path := router.StaticDirectory + r.Params["value"]
+		file, err := os.Create(path)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		file.WriteString(r.Body)
+		write := "HTTP/1.1 201 Created\r\n"
+		router.Conn.Write([]byte(write))
+	})
 	router.ServeStatic(staticDirectory)
 
 	r := request.NewRequest(buffer)
 
-	err = router.Get(&r)
+	err = router.Handle(&r)
 
 	if err != nil {
 		fmt.Println(err)

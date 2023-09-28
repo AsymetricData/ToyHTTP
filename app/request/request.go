@@ -7,12 +7,18 @@ import (
 	"strings"
 )
 
+const (
+	METHOD_GET = iota
+	METHOD_POST
+)
+
 type Request struct {
 	buffer  []byte
 	Method  int
 	Path    string
 	Params  map[string]string
 	Headers Header
+	Body    string
 }
 
 type Header struct {
@@ -22,10 +28,11 @@ type Header struct {
 
 func NewRequest(buffer []byte) Request {
 
-	req := Request{buffer, 0, "", make(map[string]string, 0), Header{"", ""}}
+	req := Request{buffer, 0, "", make(map[string]string, 0), Header{"", ""}, ""}
 
 	req.getPath()
 	req.parseHeader()
+	req.parseBody()
 
 	return req
 }
@@ -48,6 +55,10 @@ func (request *Request) parseHeader() {
 		key := strings.TrimSuffix(line[0], ":")
 
 		switch key {
+		case "GET":
+			request.Method = METHOD_GET
+		case "POST":
+			request.Method = METHOD_POST
 		case "User-Agent":
 			request.Headers.UserAgent = strings.Join(line[1:], " ")
 		case "Host":
@@ -57,6 +68,16 @@ func (request *Request) parseHeader() {
 		}
 	}
 
+}
+
+func (request *Request) parseBody() {
+	segments := strings.Split(string(request.buffer), "\r\n\r\n")
+
+	if len(segments) < 2 {
+		panic("No headers nor body")
+	}
+
+	request.Body = segments[1]
 }
 
 func (request *Request) getPath() string {
