@@ -39,6 +39,7 @@ func (response *Response) Write(data string) {
 	len := len(data)
 
 	buffer := ""
+	//
 
 	for index, value := range response.headers {
 		buffer = buffer + index + " " + value + "\r\n"
