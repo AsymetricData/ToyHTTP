@@ -28,7 +28,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		handleRequest(conn)
+		go handleRequest(conn)
 	}
 }
 
