@@ -45,7 +45,7 @@ func (request *Request) parseHeader() {
 			break
 		}
 
-		key, _ := strings.CutSuffix(line[0], ":")
+		key := strings.TrimSuffix(line[0], ":")
 
 		switch key {
 		case "User-Agent":
