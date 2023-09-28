@@ -50,10 +50,8 @@ func (request *Request) parseHeader() {
 		switch key {
 		case "User-Agent":
 			request.Headers.UserAgent = strings.Join(line[1:], " ")
-			fmt.Println("UA : ", request.Headers.UserAgent)
 		case "Host":
 			request.Headers.Host = strings.Join(line[1:], " ")
-			fmt.Println("Host : ", request.Headers.Host)
 		default:
 			//noting
 		}
