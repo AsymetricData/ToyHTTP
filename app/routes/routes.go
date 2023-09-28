@@ -58,7 +58,7 @@ func (router *Router) Post(path string, handler func(conn net.Conn, r *request.R
 
 func (router *Router) ServeStatic(directory string) {
 	/* 	wd, _ := os.Getwd() */
-	router.StaticDirectory = /* wd + "/" + */ directory + "/"
+	router.StaticDirectory = /* wd + "/" + */ strings.TrimSuffix(directory, "/") + "/"
 }
 
 func (router *Router) Handle(r *request.Request) error {
