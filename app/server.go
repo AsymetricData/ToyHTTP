@@ -82,7 +82,7 @@ func handleRequest(conn net.Conn) {
 			}
 		} else {
 			/* write := "HTTP/1.1 404 Not Found \r\n" */
-			resp.SetStatus(404)
+			resp.NotFound()
 		}
 	})
 	router.Post("/files/{value}", func(resp *response.Response, r *request.Request) {
@@ -110,18 +110,6 @@ func handleRequest(conn net.Conn) {
 
 	if err != nil {
 		fmt.Println(err)
-		writeResponse("HTTP/1.1 404 Not Found", 404, conn)
 	}
 
-}
-
-func writeResponse(response string, status int, conn net.Conn) {
-
-	//responseLen := len(response)
-
-	_, err := conn.Write([]byte(response + "\r\n\r\n"))
-
-	if err != nil {
-		fmt.Println("Error Write ", err)
-	}
 }

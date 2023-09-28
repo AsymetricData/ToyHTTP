@@ -49,3 +49,8 @@ func (response *Response) Write(data string) {
 
 	response.conn.Write([]byte(buffer))
 }
+
+func (response *Response) NotFound() {
+	response.SetHeader("HTTP/1.1", "404 Not Found")
+	response.Write("")
+}

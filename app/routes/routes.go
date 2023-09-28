@@ -64,6 +64,8 @@ func (router *Router) ServeStatic(directory string) {
 
 func (router *Router) Handle(r *request.Request) error {
 
+	resp := response.NewResponse(router.Conn)
+
 	for _, route := range router.Routes {
 
 		if route.Method != r.Method {
@@ -80,12 +82,12 @@ func (router *Router) Handle(r *request.Request) error {
 					r.Params[route.Params[index]] = value
 				}
 			}
-			resp := response.NewResponse(router.Conn)
 			route.Handler(&resp, r)
 			return nil
 		}
 	}
 
+	resp.NotFound()
 	return errors.New("no route found")
 }
 
