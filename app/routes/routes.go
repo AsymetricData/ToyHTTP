@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	"github.com/codecrafters-io/http-server-starter-go/app/request"
+	"github.com/codecrafters-io/http-server-starter-go/app/response"
 )
 
 type Route struct {
 	Path    string
 	Params  []string
-	Handler func(conn net.Conn, request *request.Request)
+	Handler func(resp *response.Response, request *request.Request)
 	Method  int
 }
 
@@ -26,7 +27,7 @@ func NewRouter(basePath string, conn net.Conn) Router {
 	return Router{make([]Route, 0), basePath, conn, ""}
 }
 
-func (router *Router) Get(path string, handler func(conn net.Conn, r *request.Request)) {
+func (router *Router) Get(path string, handler func(resp *response.Response, r *request.Request)) {
 	segments := strings.Split(path, "/")
 	params := make([]string, 0)
 	for index := range segments {
@@ -41,7 +42,7 @@ func (router *Router) Get(path string, handler func(conn net.Conn, r *request.Re
 	router.Routes = append(router.Routes, Route{path, params, handler, request.METHOD_GET})
 }
 
-func (router *Router) Post(path string, handler func(conn net.Conn, r *request.Request)) {
+func (router *Router) Post(path string, handler func(resp *response.Response, r *request.Request)) {
 	segments := strings.Split(path, "/")
 	params := make([]string, 0)
 	for index := range segments {
@@ -79,7 +80,8 @@ func (router *Router) Handle(r *request.Request) error {
 					r.Params[route.Params[index]] = value
 				}
 			}
-			route.Handler(router.Conn, r)
+			resp := response.NewResponse(router.Conn)
+			route.Handler(&resp, r)
 			return nil
 		}
 	}

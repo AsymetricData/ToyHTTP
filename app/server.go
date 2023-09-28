@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/codecrafters-io/http-server-starter-go/app/request"
+	"github.com/codecrafters-io/http-server-starter-go/app/response"
 	"github.com/codecrafters-io/http-server-starter-go/app/routes"
 )
 
@@ -47,8 +47,6 @@ func handleRequest(conn net.Conn) {
 	buffer := make([]byte, 1024)
 	_, err := conn.Read(buffer)
 
-	//ok
-
 	if err != nil {
 		//fmt.Println("Error while reading Conn ", err)
 		return
@@ -56,39 +54,38 @@ func handleRequest(conn net.Conn) {
 	//fmt.Println("Handled new data : ", n)
 
 	router := routes.NewRouter("/", conn)
-	router.Get("/", func(conn net.Conn, r *request.Request) {
-		writeResponse("HTTP/1.1 200 OK", 200, conn)
+	router.Get("/", func(resp *response.Response, r *request.Request) {
+		resp.Write("index")
 	})
-	router.Get("/echo/{val}/{value}", func(conn net.Conn, r *request.Request) {
+	router.Get("/echo/{val}/{value}", func(resp *response.Response, r *request.Request) {
 		value := r.Params["val"] + "/" + r.Params["value"]
-		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
+		resp.Write(value)
 	})
-	router.Get("/echo/{value}", func(conn net.Conn, r *request.Request) {
+	router.Get("/echo/{value}", func(resp *response.Response, r *request.Request) {
 		value := r.Params["value"]
-		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
+		resp.Write(value)
 	})
-	router.Get("/user-agent", func(conn net.Conn, r *request.Request) {
+	router.Get("/user-agent", func(resp *response.Response, r *request.Request) {
 		value := r.Headers.UserAgent
-		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
+		resp.Write(value)
 	})
-	router.Get("/files/{value}", func(conn net.Conn, r *request.Request) {
+	router.Get("/files/{value}", func(resp *response.Response, r *request.Request) {
 		path := router.StaticDirectory + r.Params["value"]
 		fmt.Println(path)
 		if _, err := os.Stat(path); err == nil {
 			value, err := os.ReadFile(path)
 			if err == nil {
-				write := "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + strconv.Itoa(len(value)) + "\r\n\r\n" + string(value)
-				router.Conn.Write([]byte(write))
+				resp.SetHeader("Content-Type", "application/octet")
+				resp.Write(string(value))
 			} else {
 				fmt.Println("Error while loading file", err)
 			}
 		} else {
-			write := "HTTP/1.1 404 Not Found \r\n"
-			router.Conn.Write([]byte(write))
-			fmt.Println("Not found !")
+			/* write := "HTTP/1.1 404 Not Found \r\n" */
+			resp.SetStatus(404)
 		}
 	})
-	router.Post("/files/{value}", func(conn net.Conn, r *request.Request) {
+	router.Post("/files/{value}", func(resp *response.Response, r *request.Request) {
 		path := router.StaticDirectory + strings.TrimPrefix(r.Params["value"], "/")
 		file, err := os.Create(path)
 
@@ -102,8 +99,8 @@ func handleRequest(conn net.Conn) {
 		fmt.Println("Creating a file ", file.Name())
 
 		file.WriteString(r.Body)
-		write := "HTTP/1.1 201 Created \r\n\r\n"
-		router.Conn.Write([]byte(write))
+		resp.SetHeader("HTTP/1.1", "201 Created")
+		resp.Write("")
 	})
 	router.ServeStatic(staticDirectory)
 
