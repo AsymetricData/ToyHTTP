@@ -55,7 +55,7 @@ func handleRequest(conn net.Conn) {
 
 	router := routes.NewRouter("/", conn)
 	router.Get("/", func(resp *response.Response, r *request.Request) {
-		resp.Write("index")
+		resp.Write("")
 	})
 	router.Get("/echo/{val}/{value}", func(resp *response.Response, r *request.Request) {
 		value := r.Params["val"] + "/" + r.Params["value"]
