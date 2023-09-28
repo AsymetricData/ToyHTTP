@@ -73,11 +73,15 @@ func (request *Request) parseHeader() {
 func (request *Request) parseBody() {
 	segments := strings.Split(string(request.buffer), "\r\n\r\n")
 
-	if len(segments) >= 2 {
-		fmt.Println(segments[2])
+	body := make([]byte, 0)
 
-		request.Body = segments[2]
+	for _, val := range body {
+		if val != 0 {
+			body = append(body, val)
+		}
 	}
+
+	request.Body = string(body)
 }
 
 func (request *Request) getPath() string {
