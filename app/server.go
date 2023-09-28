@@ -89,7 +89,7 @@ func handleRequest(conn net.Conn) {
 		}
 	})
 	router.Post("/files/{value}", func(conn net.Conn, r *request.Request) {
-		path := router.StaticDirectory + strings.TrimSuffix(r.Params["value"], "/")
+		path := router.StaticDirectory + strings.TrimPrefix(r.Params["value"], "/")
 		file, err := os.Create(path)
 
 		if err != nil {
