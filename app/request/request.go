@@ -77,7 +77,9 @@ func (request *Request) parseBody() {
 		panic("No headers nor body")
 	}
 
-	request.Body = segments[1]
+	body := bytes.Index([]byte(segments[1]), []byte(""))
+
+	request.Body = segments[1][0:body]
 }
 
 func (request *Request) getPath() string {
