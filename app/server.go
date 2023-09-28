@@ -92,9 +92,12 @@ func handleRequest(conn net.Conn) {
 		path := router.StaticDirectory + strings.TrimPrefix(r.Params["value"], "/")
 		file, err := os.Create(path)
 
-		if err != nil {
+		if file == nil {
 			fmt.Println(err)
+			return
 		}
+
+		defer file.Close()
 
 		fmt.Println("Creating a file ", file.Name())
 
