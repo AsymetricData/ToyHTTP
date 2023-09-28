@@ -102,7 +102,7 @@ func handleRequest(conn net.Conn) {
 		fmt.Println("Creating a file ", file.Name())
 
 		file.WriteString(r.Body)
-		write := "HTTP/1.1 201 Created \r\n"
+		write := "HTTP/1.1 201 Created \r\n\r\n"
 		router.Conn.Write([]byte(write))
 	})
 	router.ServeStatic(staticDirectory)
