@@ -4,22 +4,61 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Request struct {
-	buffer []byte
-	Method string
-	Path   string
-	Params map[string]string
+	buffer  []byte
+	Method  int
+	Path    string
+	Params  map[string]string
+	Headers Header
+}
+
+type Header struct {
+	UserAgent string
+	Host      string
 }
 
 func NewRequest(buffer []byte) Request {
 
-	req := Request{buffer, "", "", make(map[string]string, 0)}
+	req := Request{buffer, 0, "", make(map[string]string, 0), Header{"", ""}}
 
 	req.getPath()
+	req.parseHeader()
 
 	return req
+}
+
+func (request *Request) parseHeader() {
+	segments := strings.Split(string(request.buffer), "\r\n\r\n")
+
+	if len(segments) < 2 {
+		panic("No headers nor body")
+	}
+
+	headers := strings.Split(segments[0], "\r\n")
+
+	for _, value := range headers {
+		line := strings.Split(value, " ")
+		if len(line) < 1 {
+			break
+		}
+
+		key, _ := strings.CutSuffix(line[0], ":")
+
+		switch key {
+		case "User-Agent":
+			request.Headers.UserAgent = strings.Join(line[1:], " ")
+			fmt.Println("UA : ", request.Headers.UserAgent)
+		case "Host":
+			request.Headers.Host = strings.Join(line[1:], " ")
+			fmt.Println("Host : ", request.Headers.Host)
+		default:
+			//noting
+		}
+	}
+
 }
 
 func (request *Request) getPath() string {

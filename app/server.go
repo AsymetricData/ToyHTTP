@@ -39,20 +39,14 @@ func handleRequest(conn net.Conn) {
 	_, err := conn.Read(buffer)
 
 	if err != nil {
-		fmt.Println("Error while reading Conn ", err)
+		//fmt.Println("Error while reading Conn ", err)
+		return
 	}
 	//fmt.Println("Handled new data : ", n)
 
 	router := routes.NewRouter("/", conn)
-	router.Handle("/", func(conn net.Conn, r *request.Request) {
-		writeResponse("HTTP/1.1 200 OK", 200, conn)
-	})
-	router.Handle("/echo/{val}/{value}", func(conn net.Conn, r *request.Request) {
-		value := r.Params["val"] + "/" + r.Params["value"]
-		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
-	})
-	router.Handle("/echo/{value}", func(conn net.Conn, r *request.Request) {
-		value := r.Params["value"]
+	router.Handle("/user-agent", func(conn net.Conn, r *request.Request) {
+		value := r.Headers.UserAgent
 		writeResponse("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+strconv.Itoa(len(value))+"\r\n\r\n"+value, 200, conn)
 	})
 

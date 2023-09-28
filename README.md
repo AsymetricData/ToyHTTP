@@ -3,4 +3,4 @@
 # My attempts on CodeCrafters.io - Build Your Own HTTP server
 ["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
 
-I'm stil learning Go
+I'm still learning Go
