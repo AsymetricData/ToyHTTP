@@ -73,7 +73,7 @@ func (request *Request) parseHeader() {
 func (request *Request) parseBody() {
 	segments := strings.Split(string(request.buffer), "\r\n\r\n")
 
-	if len(segments) > 2 {
+	if len(segments) >= 2 {
 		fmt.Println(segments[2])
 
 		request.Body = segments[2]
