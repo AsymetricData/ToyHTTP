@@ -43,7 +43,7 @@ func main() {
 func handleRequest(conn net.Conn) {
 	defer conn.Close()
 
-	buffer := make([]byte, 2048)
+	buffer := make([]byte, 1024)
 	_, err := conn.Read(buffer)
 
 	//ok
