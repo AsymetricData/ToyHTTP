@@ -3,7 +3,6 @@ package routes
 import (
 	"errors"
 	"net"
-	"os"
 	"strings"
 
 	"github.com/codecrafters-io/http-server-starter-go/app/request"
@@ -42,8 +41,8 @@ func (router *Router) Handle(path string, handler func(conn net.Conn, r *request
 }
 
 func (router *Router) ServeStatic(directory string) {
-	wd, _ := os.Getwd()
-	router.StaticDirectory = wd + "/" + directory + "/"
+	/* 	wd, _ := os.Getwd() */
+	router.StaticDirectory = /* wd + "/" + */ directory + "/"
 }
 
 func (router *Router) Get(r *request.Request) error {
